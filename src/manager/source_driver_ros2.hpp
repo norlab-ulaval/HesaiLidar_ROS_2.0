@@ -109,9 +109,13 @@ protected:
 };
 inline SourceDriver::SourceDriver(const rclcpp::NodeOptions & options) : Node("hesai_ros_driver_node", options)
 {
-    std::string config_path;
-    config_path = (std::string)PROJECT_PATH;
-    config_path += "/config/config.yaml";
+    // Allow overriding the config file path via a ROS parameter.
+    // Default: the built-in config/config.yaml compiled into the package.
+    // Override: pass config_path:=<absolute_path> from the launch file.
+    this->declare_parameter<std::string>("config_path",
+        std::string(PROJECT_PATH) + "/config/config.yaml");
+    std::string config_path = this->get_parameter("config_path").as_string();
+
     YAML::Node config;
     config = YAML::LoadFile(config_path);
     YAML::Node lidar_config = YamlSubNodeAbort(config, "lidar");

@@ -159,7 +159,12 @@ link_directories(${Boost_LIBRARY_DIRS})
 # if install different cuda version, set the cuda path, like cuda-11.4
 # set(CUDA_TOOLKIT_ROOT_DIR /usr/local/cuda-11.4/)
 # find_package(CUDA REQUIRED)
-find_package(CUDA )
+find_package(CUDA QUIET)
+# Force non-CUDA path: the CUDA branch creates an executable (not a component) and
+# leaves target_include_directories / ament_target_dependencies unreachable for
+# the component target, causing a CMake error when CUDA is present on the host.
+# The non-CUDA branch correctly creates hesai_ros_driver_component for ROS 2 composition.
+set(CUDA_FOUND FALSE)
 
 if(CUDA_FOUND)
 
@@ -287,9 +292,14 @@ if($ENV{ROS_VERSION} MATCHES "2")
   )
 
   install(DIRECTORY
+    config
     launch
     rviz
     DESTINATION share/${PROJECT_NAME})
+
+  install(DIRECTORY
+    src/driver/HesaiLidar_SDK_2.0/correction
+    DESTINATION share/${PROJECT_NAME}/sdk_assets)
 
 
   ament_package()
