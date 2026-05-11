@@ -145,6 +145,23 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 #Driver core#
 add_subdirectory(src/driver/HesaiLidar_SDK_2.0)
 
+# ── Fix missing link dependencies in libhesai intermediate targets ────────────
+# The upstream HesaiLidar_SDK_2.0/libhesai/CMakeLists.txt does not link log_lib
+# into platutils_lib or ptcClient_lib, causing undefined-reference errors on
+# Linux when the linker checks shared-library completeness.
+# We patch the targets here (parent scope) so the fix lives in norlab's fork
+# rather than in the upstream submodule, which we cannot push to.
+#
+# CMP0079: allow target_link_libraries() to reference targets from other dirs.
+# Requires CMake ≥ 3.13 (already met by hesai_ros_driver's cmake_minimum).
+cmake_policy(SET CMP0079 NEW)
+set_target_properties(log_lib PROPERTIES EXCLUDE_FROM_ALL FALSE)
+# Use plain (non-keyword) form to stay consistent with the existing calls in
+# libhesai/CMakeLists.txt (mixing keyword and plain is a CMake error).
+target_link_libraries(platutils_lib log_lib)
+target_link_libraries(ptcClient_lib log_lib platutils_lib ptcParser_lib)
+# ─────────────────────────────────────────────────────────────────────────────
+
 #========================
 # Build Setup
 #========================
