@@ -137,6 +137,7 @@ endif($ENV{ROS_VERSION} MATCHES "2")
 
 #Others#
 find_package(yaml-cpp REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 #Include directory#
 include_directories(${PROJECT_SOURCE_DIR}/src)
@@ -221,6 +222,8 @@ else(CUDA_FOUND)
   )
   target_link_libraries(hesai_ros_driver_component
     ${YAML_CPP_LIBRARIES}
+    OpenSSL::SSL
+    OpenSSL::Crypto
   )
   rclcpp_components_register_node(
     hesai_ros_driver_component
